@@ -1,0 +1,105 @@
+.page { padding-bottom: var(--space-2xl); }
+
+.hero {
+  background: linear-gradient(160deg, var(--color-chocolate) 0%, var(--color-caramel) 100%);
+  color: var(--color-white);
+  padding: var(--space-2xl) var(--space-lg);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '🥐';
+  position: absolute;
+  font-size: 12rem;
+  opacity: 0.06;
+  right: -2rem;
+  top: -2rem;
+  transform: rotate(-20deg);
+}
+
+.hero h1 {
+  font-size: 3rem;
+  color: var(--color-butter);
+  margin-bottom: var(--space-sm);
+}
+
+.hero p {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.offlineBanner {
+  background: var(--color-warning);
+  color: var(--color-white);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-lg);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.filters {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin: var(--space-xl) 0 var(--space-lg);
+}
+
+.filter, .filterActive {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 2px solid var(--color-caramel);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.filter {
+  background: transparent;
+  color: var(--color-caramel);
+}
+
+.filter:hover { background: var(--color-sand); }
+
+.filterActive {
+  background: var(--color-caramel);
+  color: var(--color-white);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-lg);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-2xl);
+  color: var(--color-stone);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--color-sand);
+  border-top-color: var(--color-caramel);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-stone);
+  padding: var(--space-2xl);
+  font-style: italic;
+}

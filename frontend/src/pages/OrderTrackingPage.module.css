@@ -1,0 +1,42 @@
+.page {
+  display: flex; align-items: center; justify-content: center;
+  min-height: calc(100vh - 128px); padding: var(--space-xl);
+}
+
+.card {
+  background: var(--color-white); border-radius: var(--radius-xl);
+  padding: var(--space-2xl); max-width: 520px; width: 100%;
+  text-align: center; box-shadow: var(--shadow-lg);
+}
+
+.card h1 { font-family: var(--font-display); font-size: 2rem; color: var(--color-chocolate); }
+.orderId { color: var(--color-stone); font-family: monospace; margin: var(--space-sm) 0 var(--space-xl); }
+
+.steps { display: flex; flex-direction: column; gap: 0; align-items: flex-start; margin-bottom: var(--space-xl); }
+
+.step {
+  display: flex; align-items: center; gap: var(--space-md);
+  position: relative; padding: var(--space-sm) 0; width: 100%;
+  color: var(--color-stone);
+}
+
+.done  { color: var(--color-success); }
+.active { color: var(--color-caramel); font-weight: 700; }
+
+.stepDot { font-size: 1.5rem; min-width: 40px; text-align: center; }
+.stepLabel { font-size: 0.95rem; }
+
+.connector {
+  position: absolute; left: 19px; top: 100%;
+  width: 2px; height: var(--space-sm);
+  background: var(--color-sand);
+}
+.connectorDone { background: var(--color-success); }
+
+.eta {
+  display: flex; justify-content: center; gap: var(--space-sm);
+  background: var(--color-linen); padding: var(--space-md);
+  border-radius: var(--radius-md); font-size: 0.95rem;
+}
+
+.eta strong { color: var(--color-caramel); }

@@ -1,0 +1,6 @@
+.footer { background: var(--color-espresso); color: var(--color-gray-200); padding: 40px 0; margin-top: 80px; }
+.footer-inner { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.footer-brand span { font-family: var(--font-display); font-size: 1.2rem; color: var(--color-gold); }
+.footer-brand p, .footer-stores span, .footer-tech span { font-size: 0.85rem; color: var(--color-gray-400); display: block; margin-top: 4px; }
+.footer-stores strong, .footer-tech strong { color: var(--color-cream); font-size: 0.9rem; }
+@media (max-width: 768px) { .footer-inner { grid-template-columns: 1fr; } }

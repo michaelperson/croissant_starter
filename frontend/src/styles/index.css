@@ -1,0 +1,102 @@
+/* =============================================
+   COISSANT 2.0 — Design System
+   Palette : Warm Ivory + Deep Espresso + Gold
+   ============================================= */
+
+:root {
+  --color-ivory:    #FAF7F0;
+  --color-cream:    #F5EDD9;
+  --color-gold:     #C8952A;
+  --color-gold-light: #E8B94A;
+  --color-espresso: #2C1810;
+  --color-brown:    #5C3D2E;
+  --color-brown-mid:#8B5E3C;
+  --color-white:    #FFFFFF;
+  --color-gray-100: #F0EBE3;
+  --color-gray-200: #E0D5C8;
+  --color-gray-400: #9E8B78;
+  --color-success:  #4A7C59;
+  --color-danger:   #B84040;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  32px;
+
+  --shadow-sm:  0 2px 8px rgba(44, 24, 16, 0.08);
+  --shadow-md:  0 4px 20px rgba(44, 24, 16, 0.12);
+  --shadow-lg:  0 8px 40px rgba(44, 24, 16, 0.18);
+
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-ivory);
+  color: var(--color-espresso);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar stylée */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-cream); }
+::-webkit-scrollbar-thumb { background: var(--color-gold); border-radius: 3px; }
+
+/* Utilitaires */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+/* Boutons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: 0.95rem; font-weight: 500;
+  border: none; cursor: pointer; transition: var(--transition); text-decoration: none;
+}
+.btn-primary   { background: var(--color-espresso); color: var(--color-ivory); }
+.btn-primary:hover { background: var(--color-brown); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-gold      { background: var(--color-gold); color: var(--color-white); }
+.btn-gold:hover { background: var(--color-gold-light); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-outline   { background: transparent; border: 2px solid var(--color-espresso); color: var(--color-espresso); }
+.btn-outline:hover { background: var(--color-espresso); color: var(--color-ivory); }
+.btn:disabled  { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.animate-in { animation: fadeInUp 0.4s ease forwards; }
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-200) 50%, var(--color-gray-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Badges de statut commande */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 999px;
+  font-size: 0.8rem; font-weight: 500;
+}
+.badge-pending    { background: #FFF3CD; color: #856404; }
+.badge-confirmed  { background: #D1ECF1; color: #0C5460; }
+.badge-preparing  { background: #FFE5B4; color: #7D4E00; }
+.badge-ready      { background: #D4EDDA; color: #155724; }
+.badge-delivered  { background: #E2E3E5; color: #383D41; }
+.badge-cancelled  { background: #F8D7DA; color: #721C24; }

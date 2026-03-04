@@ -1,0 +1,18 @@
+{
+  "name": "coissant-2.0",
+  "version": "2.0.0",
+  "description": "Application de commande CroissantExpress — Projet de formation Azure DevOps",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "dev:backend":  "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "test:all":     "cd backend && npm test && cd ../frontend && npm test",
+    "lint:all":     "cd backend && npm run lint && cd ../frontend && npm run lint"
+  },
+  "keywords": ["azure", "devops", "formation", "croissant", "react", "nodejs"]
+}

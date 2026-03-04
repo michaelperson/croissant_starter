@@ -1,0 +1,29 @@
+# Dépendances Node.js (jamais dans Git)
+node_modules/
+*/node_modules/
+
+# Variables d'environnement (JAMAIS dans Git — contient les secrets)
+.env
+backend/.env
+frontend/.env
+
+# Builds
+frontend/dist/
+frontend/build/
+
+# Couverture de tests
+coverage/
+*/coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,29 @@
+.footer {
+  background: var(--color-espresso);
+  color: var(--color-sand);
+  padding: var(--space-xl) 0;
+  margin-top: auto;
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  text-align: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--color-butter);
+}
+
+.tagline { color: var(--color-stone); font-style: italic; }
+.copy { font-size: 0.8rem; color: var(--color-stone); }

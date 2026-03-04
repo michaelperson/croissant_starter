@@ -1,0 +1,161 @@
+# ============================================================================
+#  COISSANT 2.0 — Pipeline d'Intégration Continue (CI)
+#  Fichier : azure-pipelines/ci.yml
+#
+#  Ce pipeline est déclenché automatiquement à chaque :
+#    - Push sur n'importe quelle branche
+#    - Pull Request vers la branche 'main'
+#
+#  Concept Azure DevOps : Azure Pipelines — Build Pipeline (YAML)
+# ============================================================================
+
+trigger:
+  branches:
+    include:
+      - '*'
+  paths:
+    exclude:
+      - 'docs/**'
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+# Concept : Agents Microsoft-hosted vs Self-hosted
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  NODE_VERSION: '20.x'
+  BACKEND_DIR:  'backend'
+  FRONTEND_DIR: 'frontend'
+
+stages:
+
+# ════════════════════════════
+# ÉTAPE 1 : Lint
+# ════════════════════════════
+- stage: Lint
+  displayName: 'Analyse du code'
+  jobs:
+  - job: LintBackend
+    displayName: 'Lint Backend'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(NODE_VERSION)
+      displayName: 'Installer Node.js'
+    - script: |
+        cd $(BACKEND_DIR)
+        npm ci
+        npm run lint
+      displayName: 'ESLint Backend'
+
+  - job: LintFrontend
+    displayName: 'Lint Frontend'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(NODE_VERSION)
+    - script: |
+        cd $(FRONTEND_DIR)
+        npm ci
+        npm run lint
+      displayName: 'ESLint Frontend'
+
+# ════════════════════════════
+# ÉTAPE 2 : Tests
+# ════════════════════════════
+- stage: Test
+  displayName: 'Tests automatises'
+  dependsOn: Lint
+  jobs:
+  - job: TestBackend
+    displayName: 'Tests API Backend'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(NODE_VERSION)
+    - script: |
+        cd $(BACKEND_DIR)
+        npm ci
+        npm test
+      displayName: 'Jest Tests API'
+      env:
+        NODE_ENV: test
+    # Concept : Publication des resultats de tests dans Azure Pipelines
+    - task: PublishTestResults@2
+      displayName: 'Publier resultats'
+      condition: always()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '$(BACKEND_DIR)/junit.xml'
+        testRunTitle: 'Tests Backend - $(Build.SourceBranchName)'
+        failTaskOnFailedTests: true
+
+  - job: TestFrontend
+    displayName: 'Tests Frontend React'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(NODE_VERSION)
+    - script: |
+        cd $(FRONTEND_DIR)
+        npm ci
+        npm test
+      displayName: 'Vitest Tests Composants'
+      env:
+        CI: true
+
+# ════════════════════════════
+# ÉTAPE 3 : Build
+# ════════════════════════════
+- stage: Build
+  displayName: 'Build de application'
+  dependsOn: Test
+  jobs:
+  - job: BuildBackend
+    displayName: 'Build Backend'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(NODE_VERSION)
+    - script: |
+        cd $(BACKEND_DIR)
+        npm ci --production
+      displayName: 'Dependances production'
+    - task: ArchiveFiles@2
+      displayName: 'Archiver backend'
+      inputs:
+        rootFolderOrFile: '$(BACKEND_DIR)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/backend-$(Build.BuildId).zip'
+    # Concept : Artefacts de pipeline
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publier artefact backend'
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'backend'
+
+  - job: BuildFrontend
+    displayName: 'Build Frontend'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(NODE_VERSION)
+    - script: |
+        cd $(FRONTEND_DIR)
+        npm ci
+        npm run build
+      displayName: 'Vite build'
+      env:
+        # Concept : Variables d'environnement injectees par le pipeline (jamais dans le code)
+        VITE_API_URL: $(VITE_API_URL_STAGING)
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publier artefact frontend'
+      inputs:
+        pathToPublish: '$(FRONTEND_DIR)/dist'
+        artifactName: 'frontend'

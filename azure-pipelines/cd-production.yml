@@ -1,0 +1,157 @@
+# ============================================================================
+#  COISSANT 2.0 — Pipeline de Deploiement vers PRODUCTION
+#  Fichier : azure-pipelines/cd-production.yml
+#
+#  Concepts Azure DevOps illustres :
+#    - Environments avec Approval Gates (approbation manuelle)
+#    - Strategie Blue/Green deployment
+#    - Integration Azure Key Vault pour les secrets
+#    - Deployment slots Azure App Service
+# ============================================================================
+
+trigger: none  # Ce pipeline est declenche manuellement ou depuis CD staging
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+# Concept : Variable Groups avec Azure Key Vault
+# Le group 'coissant-production' est lie a un Azure Key Vault.
+# Les secrets (connection strings, API keys) ne transitent JAMAIS en clair.
+variables:
+  - group: coissant-production  # Lie a Azure Key Vault en production
+  - name: SLOT_NAME
+    value: 'staging-slot'       # Deployment slot pour le Blue/Green
+
+stages:
+
+# ════════════════════════════════════════════════════════════════════════════
+# ETAPE 1 : Validation pre-production
+# ════════════════════════════════════════════════════════════════════════════
+- stage: PreProductionValidation
+  displayName: 'Validation pre-production'
+  jobs:
+  - job: RunSmokeTests
+    displayName: 'Smoke Tests sur Staging'
+    steps:
+    - script: |
+        echo "Execution des smoke tests sur l'environnement staging..."
+        # Verifier que les endpoints critiques repondent
+        curl -f https://coissant-api-staging.azurewebsites.net/api/health
+        curl -f https://coissant-api-staging.azurewebsites.net/api/products
+        echo "Smoke tests reussis !"
+      displayName: 'Smoke tests staging'
+
+# ════════════════════════════════════════════════════════════════════════════
+# ETAPE 2 : Deploiement production avec approval gate
+#
+# Concept cle : Environments avec Approvals
+# L'environnement 'coissant-production' est configure dans Azure DevOps avec
+# une regles d'approbation : un responsable doit cliquer "Approuver"
+# avant que le deploiement continue.
+#
+# Analogie boulangerie : "Le chef de cuisine goute avant d'envoyer en salle"
+# ════════════════════════════════════════════════════════════════════════════
+- stage: DeployToProduction
+  displayName: 'Deploiement Production'
+  dependsOn: PreProductionValidation
+  jobs:
+
+  - deployment: DeployBackendProduction
+    displayName: 'Backend vers Production'
+    # L'environment 'coissant-production' a un approval gate configure dans
+    # Azure DevOps > Environments > coissant-production > Approvals and checks
+    environment: 'coissant-production'
+    strategy:
+      # Concept : Blue/Green Deployment avec Azure Deployment Slots
+      # Le code est d'abord deploye sur un "slot staging" du meme App Service,
+      # puis on echange les slots (swap) = zero downtime
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@1
+            inputs:
+              artifactName: 'backend'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          # Phase "Blue" : deploiement dans le slot staging (pas encore visible)
+          - task: AzureWebApp@1
+            displayName: '[Blue] Deployer dans le slot staging'
+            inputs:
+              azureSubscription: 'azure-service-connection'
+              appType: 'webApp'
+              appName: 'coissant-api-prod'
+              deployToSlotOrASE: true
+              resourceGroupName: 'rg-coissant-prod'
+              slotName: $(SLOT_NAME)
+              package: '$(System.ArtifactsDirectory)/backend/backend-*.zip'
+            env:
+              # Concept : Secrets depuis Azure Key Vault (via Variable Group)
+              # La valeur de MONGODB_URI est lue depuis Key Vault automatiquement
+              MONGODB_URI: $(MONGODB_URI)
+              NODE_ENV: production
+
+          # Verification dans le slot avant le swap
+          - script: |
+              sleep 20
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+                https://coissant-api-prod-staging-slot.azurewebsites.net/api/health)
+              [ "$STATUS" = "200" ] && echo "Slot OK" || exit 1
+            displayName: 'Verifier le slot staging'
+
+          # Phase "Green" : swap des slots = mise en production instantanee
+          - task: AzureAppServiceManage@0
+            displayName: '[Green] Swap slots - mise en production'
+            inputs:
+              azureSubscription: 'azure-service-connection'
+              Action: 'Swap Slots'
+              WebAppName: 'coissant-api-prod'
+              ResourceGroupName: 'rg-coissant-prod'
+              SourceSlot: $(SLOT_NAME)
+
+  - deployment: DeployFrontendProduction
+    displayName: 'Frontend vers Production'
+    environment: 'coissant-production'
+    dependsOn: DeployBackendProduction
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@1
+            inputs:
+              artifactName: 'frontend'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          - task: AzureStaticWebApp@0
+            displayName: 'Deployer frontend production'
+            inputs:
+              azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_PROD)
+              app_location: '/'
+              output_location: 'frontend'
+              workingDirectory: '$(System.ArtifactsDirectory)'
+
+# ════════════════════════════════════════════════════════════════════════════
+# ETAPE 3 : Validation post-production
+# ════════════════════════════════════════════════════════════════════════════
+- stage: PostDeployValidation
+  displayName: 'Validation post-deploiement'
+  dependsOn: DeployToProduction
+  jobs:
+  - job: ProductionSmokeTest
+    displayName: 'Smoke Tests production'
+    steps:
+    - script: |
+        echo "Verification de la production..."
+        curl -f https://coissant-api-prod.azurewebsites.net/api/health
+        curl -f https://coissant-api-prod.azurewebsites.net/api/products
+        echo "Production operationnelle !"
+      displayName: 'Smoke tests production'
+
+  - job: NotifySuccess
+    displayName: 'Notification succes'
+    dependsOn: ProductionSmokeTest
+    steps:
+    - script: |
+        echo "Deploiement production reussi !"
+        echo "Version: $(Build.BuildNumber)"
+        echo "Branch: $(Build.SourceBranchName)"
+      displayName: 'Log du succes'

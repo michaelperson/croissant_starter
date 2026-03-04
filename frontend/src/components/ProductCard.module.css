@@ -1,0 +1,123 @@
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+.cardAdded {
+  box-shadow: 0 0 0 3px var(--color-success) !important;
+}
+
+.imageWrapper {
+  position: relative;
+  height: 160px;
+  background: linear-gradient(135deg, var(--color-linen), var(--color-sand));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji { font-size: 5rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); }
+
+.badgeNew {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  background: var(--color-caramel);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badgeAllergen {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  font-size: 1rem;
+}
+
+.body {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.category {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-caramel);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+  margin-top: 2px;
+}
+
+.description {
+  font-size: 0.85rem;
+  color: var(--color-stone);
+  margin-top: var(--space-xs);
+  line-height: 1.5;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.price {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+}
+
+.addBtn {
+  background: var(--color-caramel);
+  color: white;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  min-width: 100px;
+  text-align: center;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: var(--color-chocolate);
+  transform: scale(1.03);
+}
+
+.addBtn:disabled {
+  background: var(--color-sand);
+  color: var(--color-stone);
+  cursor: not-allowed;
+}
+
+.addBtnSuccess {
+  background: var(--color-success) !important;
+}

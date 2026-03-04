@@ -1,0 +1,116 @@
+# ============================================================================
+#  COISSANT 2.0 — Pipeline de Deploiement Continu vers STAGING
+#  Fichier : azure-pipelines/cd-staging.yml
+#
+#  Concept Azure DevOps : Release Pipeline — Deploiement automatique
+#  Ce pipeline deploie vers l'environnement staging a chaque merge sur 'develop'
+#  Concept : Environments Azure DevOps (avec historique de deploiements)
+# ============================================================================
+
+trigger:
+  branches:
+    include:
+      - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+# Concept : Variable Groups — centraliser les variables par environnement
+# Le group 'coissant-staging' est defini dans Azure DevOps > Pipelines > Library
+variables:
+  - group: coissant-staging
+  - name: ENVIRONMENT_NAME
+    value: staging
+
+stages:
+
+# ════════════════════════════════════════════════════════════════════════════
+# ETAPE 1 : Recuperer les artefacts du pipeline CI
+# ════════════════════════════════════════════════════════════════════════════
+- stage: DeployToStaging
+  displayName: 'Deploiement vers Staging'
+  jobs:
+
+  # Concept : Deployment jobs — tracent les deploiements dans Azure Environments
+  - deployment: DeployBackendStaging
+    displayName: 'Backend vers Azure App Service (Staging)'
+    environment: 'coissant-staging'  # Environnement Azure DevOps
+    strategy:
+      # Concept : Strategie de deploiement runOnce (la plus simple)
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@1
+            displayName: 'Telecharger artefact backend'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'backend'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          # Concept : Service Connection Azure
+          # La connexion 'azure-service-connection' est configuree dans
+          # Azure DevOps > Project Settings > Service connections
+          # Elle permet au pipeline d'agir sur l'abonnement Azure
+          - task: AzureWebApp@1
+            displayName: 'Deployer sur App Service Staging'
+            inputs:
+              azureSubscription: 'azure-service-connection'
+              appType: 'webApp'
+              appName: 'coissant-api-staging'
+              package: '$(System.ArtifactsDirectory)/backend/backend-*.zip'
+
+          # Verification post-deploiement : le health check doit repondre OK
+          - script: |
+              echo "Verification du health check staging..."
+              sleep 15
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://coissant-api-staging.azurewebsites.net/api/health)
+              if [ "$STATUS" != "200" ]; then
+                echo "ECHEC : Health check renvoie $STATUS"
+                exit 1
+              fi
+              echo "OK : Health check reussi (HTTP $STATUS)"
+            displayName: 'Health check post-deploiement'
+
+  - deployment: DeployFrontendStaging
+    displayName: 'Frontend vers Azure Static Web Apps (Staging)'
+    environment: 'coissant-staging'
+    dependsOn: DeployBackendStaging
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@1
+            inputs:
+              artifactName: 'frontend'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          # Concept : Azure Static Web Apps — hebergement du frontend React
+          - task: AzureStaticWebApp@0
+            displayName: 'Deployer frontend staging'
+            inputs:
+              azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_STAGING)
+              app_location: '/'
+              output_location: 'frontend'
+              workingDirectory: '$(System.ArtifactsDirectory)'
+
+  # Notification Teams apres deploiement reussi
+  # Concept : Integration avec Microsoft Teams via webhook
+  - job: NotifyTeams
+    displayName: 'Notification Teams'
+    dependsOn:
+      - DeployBackendStaging
+      - DeployFrontendStaging
+    condition: succeeded()
+    steps:
+    - task: InvokeRestAPI@1
+      displayName: 'Notifier canal Teams'
+      inputs:
+        connectionType: 'connectedServiceName'
+        serviceConnection: 'teams-webhook'
+        method: 'POST'
+        headers: '{"Content-Type": "application/json"}'
+        body: |
+          {
+            "text": "Deploiement Staging reussi\nBranch: $(Build.SourceBranchName)\nBuild: #$(Build.BuildNumber)\nURL: https://coissant-staging.azurestaticapps.net"
+          }
