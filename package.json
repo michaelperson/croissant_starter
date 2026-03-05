@@ -5,14 +5,26 @@
   "private": true,
   "workspaces": [
     "frontend",
-    "backend"
+    "backend",
+    "packages/*"
   ],
   "scripts": {
-    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
-    "dev:backend":  "cd backend && npm run dev",
+    "install:all": "npm install && npm install --prefix frontend && npm install --prefix backend && npm install --workspaces --if-present",
+    "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "test:all":     "cd backend && npm test && cd ../frontend && npm test",
-    "lint:all":     "cd backend && npm run lint && cd ../frontend && npm run lint"
+    "test:all": "cd backend && npm test && cd ../frontend && npm test && cd ../packages/shared-models && npm test --if-present",
+    "lint:all": "cd backend && npm run lint && cd ../frontend && npm run lint && cd ../packages/shared-models && npm run lint --if-present",
+    "build:packages": "npm run build --workspaces --if-present"
   },
-  "keywords": ["azure", "devops", "formation", "croissant", "react", "nodejs"]
+  "keywords": [
+    "azure",
+    "devops",
+    "formation",
+    "croissant",
+    "react",
+    "nodejs"
+  ],
+  "devDependencies": {
+    "vitest": "^4.0.18"
+  }
 }

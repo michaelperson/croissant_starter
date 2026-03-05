@@ -4,12 +4,12 @@
  * Ces tests sont exécutés dans la pipeline CI (azure-pipelines/ci.yml)
  * à chaque push / pull request.
  *
- * 💡 Formation DevOps : La pipeline ne déploie en staging QUE si tous
+ * Formation DevOps : La pipeline ne déploie en staging QUE si tous
  * ces tests passent avec succès. C'est la porte de qualité (quality gate).
  */
 
 const request = require("supertest");
-const app = require("../../server");
+const app = require("../server");
 
 // ── Health Check ──────────────────────────────────────────────────────────────
 describe("GET /api/health", () => {

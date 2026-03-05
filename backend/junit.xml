@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="6" failures="0" errors="0" time="1.191">
+  <testsuite name="GET /api/health" errors="0" failures="0" skipped="0" timestamp="2026-03-05T21:52:38" time="0.932" tests="5">
+    <testcase classname="GET /api/health devrait retourner un statut 200 ou 503" name="GET /api/health devrait retourner un statut 200 ou 503" time="0.021">
+    </testcase>
+    <testcase classname="Routes invalides devrait retourner 404 pour une route inexistante" name="Routes invalides devrait retourner 404 pour une route inexistante" time="0.005">
+    </testcase>
+    <testcase classname="GET /api/products devrait retourner un tableau (même vide)" name="GET /api/products devrait retourner un tableau (même vide)" time="0.007">
+    </testcase>
+    <testcase classname="POST /api/orders - Validation devrait refuser une commande sans nom client" name="POST /api/orders - Validation devrait refuser une commande sans nom client" time="0.014">
+    </testcase>
+    <testcase classname="POST /api/orders - Validation devrait refuser une commande avec un email invalide" name="POST /api/orders - Validation devrait refuser une commande avec un email invalide" time="0.006">
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /api/health" errors="0" failures="0" skipped="0" timestamp="2026-03-05T21:52:39" time="0.195" tests="1">
+    <testcase classname="GET /api/health renvoie 200 avec les infos de santé" name="GET /api/health renvoie 200 avec les infos de santé" time="0.006">
+    </testcase>
+  </testsuite>
+</testsuites>

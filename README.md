@@ -130,6 +130,11 @@ coissant-2.0/
 │   ├── models/                  # Schémas de données (Product, Order)
 │   └── server.js                # Point d'entrée
 │
+├── packages/                    # Packages partagés (Workspaces npm)
+│   └── shared-models/           # Constants, modèles réutilisés par front et back (par ex: statuts, catégories)
+│       ├── index.js
+│       └── package.json
+│
 ├── tests/                       # Tests automatisés
 │   ├── api/                     # Tests de l'API (Jest + Supertest)
 │   └── frontend/                # Tests des composants (Vitest)
@@ -254,19 +259,21 @@ Backlog
 
 ### 5. Azure Artifacts — Gestion des packages
 
-Si le projet grandit, extraire les composants UI partagés dans un package :
+Pour ce projet, nous utilisons les workspaces npm pour la logique locale. Mais si le projet grandissait vers de multiples dépôts (app mobile, borne), vous pourriez héberger ces packages partagés :
 
 ```bash
-# Package npm interne : @croissantexpress/ui-components
-# Publié dans Azure Artifacts Feed
+# S'authentifier auprès d'Azure Artifacts
+npm login --registry=https://pkgs.dev.azure.com/votre-org/coissant/_packaging/coissant-feed/npm/registry/
 
+# Depuis un composant, ex: packages/shared-models
+cd packages/shared-models
 npm publish --registry https://pkgs.dev.azure.com/votre-org/coissant/_packaging/coissant-feed/npm/registry/
 ```
 
 **Cas d'usage illustré :**
-- Le composant `ProductCard` pourrait être publié comme package npm interne
-- D'autres projets CroissantExpress (app mobile, borne de commande) le réutilisent
-- Le feed Azure Artifacts joue le rôle de registre npm privé
+- Le package `@coissant/shared-models` est généré et packagé en `.tgz` par le pipeline CI.
+- Azure DevOps peut stocker ce package dans un Feed Azure Artifacts (serveur resgitre npm interne sécurisé).
+- Ce packaging réduit le code dupliqué et protège la propriété intellectuelle.
 
 ---
 
